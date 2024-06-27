@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>dashboard</title>
+  </head>
+  <body>
+    
+    <div id="qrcode"></div>
+    <span id="vars"></span>
+    <script>
+      const varsDOM = document.getElementById("vars")
+      let ws = null;
+      let wsVisualizer = null;
+      function connectWebSocket(url) {
+        ws = new WebSocket(url);
+        ws.onopen = () => {
+          console.log("connected");
+        };
+        ws.onclose = () => {
+          console.log("disconnected");
+        };
+        ws.onmessage = (event) => {
+          console.log(event.data);
+          varsDOM.innerHTML = event.data
+        };
+      }
+      const { ipcRenderer } = require("electron");
+      ipcRenderer.on("qrcode", (event, url) => {
+        const img = document.createElement("img");
+        img.src = url;
+        document.getElementById("qrcode").appendChild(img);
+      });
+      ipcRenderer.on("wsurl", (event, data) => {
+        console.log(data);
+        connectWebSocket(data)
+      });
+    </script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 {
-  "name": "turret-server",
+  "name": "serial-server",
   "version": "1.0.0",
-  "description": "node js server to control serial communication, made for a turret shooter",
+  "description": "node js server to control serial communication",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -17,6 +17,8 @@
     "prompt-sync": "^4.2.0",
     "qrcode": "^1.5.3",
     "serialport": "^12.0.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "uuid": "^10.0.0",
     "ws": "^8.17.1"
   }

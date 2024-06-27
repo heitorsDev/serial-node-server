@@ -1,6 +1,6 @@
 ## node server for turret control
 **description:**
-node js server to control serial communication, made for a turret shooter
+node js server to control serial communication
 
 **setup instructions:**
 set .env variables:

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>handcontrol</title>
+
+      </head>
+  <body>
+    <h2>Handtrack control</h2>
+    <button id="connectButton" onclick="createConnections()">connect</button>
+    <br />
+    status: <span id="statusDiv">null</span><br />
+    input:
+    <input type="text" placeholder="text to send" id="textInput" /><button
+      id="sendButton"
+      onclick="handleSend()"
+    >
+      send
+    </button>
+    <br />
+    message:
+    <div id="messageDiv"></div>
+    <video id="video" width="640" height="480" autoplay style="display: none;"></video>
+    <canvas id="output" width="640" height="480"></canvas>
+    <div id="x8"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+    <script src="client.js"></script>
+  </body>
+</html>
