@@ -12,6 +12,15 @@ const electron = require("electron");
 function map(x, in_min, in_max, out_min, out_max) {
   return ((x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
 }
+function clamp(x, min, max){
+  if (x<min){
+    return min
+  } else if (x>max){
+    return max
+  } else {
+    return x
+  }
+}
 
 const portInput = process.env.COM_PORT;
 const port = new SerialPort({
@@ -34,7 +43,7 @@ let lastData = null;
 
 port.on("data", (data) => {
   if (data !== lastData) {
-    //console.log(serial data: ${data});
+    console.log(`serial data: ${data}`);
     lastData = data;
   }
 });
@@ -87,9 +96,9 @@ wss.on("connection", (ws) => {
       }
     });
     let json = JSON.parse(message)
-    let float = parseFloat(json.distance4to8);
-    let out = map(float, 0, 0.5, 0, 180)
-    port.write(`${out}\r`);
+    let float = parseFloat(json.angleHand);
+    let out = clamp(map(float, -80, 80, 0, 180), 0, 180)
+    port.write(`${out.toFixed(2)},1,2\r`);
     console.log(`${out}\n`);
   }
 );
