@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="graph"></div>
+    <script>
+      function map(x, in_min, in_max, out_min, out_max) {
+        return (
+          ((x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+        );
+      }
+      const dataU = [
+        {
+          name: "x",
+          min: 0,
+          max: 1,
+          value: 0,
+        },
+        {
+          name: "y",
+          min: 0,
+          max: 1,
+          value: 0,
+        },
+        {
+          name: "z",
+          min: 0,
+          max: 1,
+          value: 0,
+        },
+      ];
+      function Graph(data) {
+        this.data = data;
+        this.queryID = null;
+        this.updateSingle = function (value, index) {
+          this.data[index].value = value;
+        };
+
+        this.updateArray = function (array) {
+          for (let i = 0; i < array.length; i++) {
+            this.data[i].value = array[i];
+          }
+        };
+
+        this.updateAll = function (json) {
+          this.data = json;
+        };
+
+        this.log = function () {
+          console.log(this.data);
+        };
+
+        this.initGraph = function (queryID) {
+          const style = document.createElement("style");
+          style.textContent = `
+            .graph-bar-container {
+              display: flex;
+              width: 450px;
+              height: 50px;
+            }
+            .graph-bar-name {
+              width: 50px;
+              background-color: yellow;
+            }
+            .graph-bar {
+              background-color: red;
+              width: 400px;
+            }
+          `;
+          document.head.appendChild(style);
+          this.queryID = queryID;
+          const query = document.getElementById(queryID);
+          let htmlString = "";
+          query.style.display = "flex";
+          query.style.flexDirection = "column";
+          for (let i = 0; i < this.data.length; i++) {
+            htmlString += `
+              <div class="graph-bar-container"">
+                <div class="graph-bar-name">${this.data[i].name}:</div>
+                <div class="graph-bar" id="${this.data[i].name}"></div>
+              </div>
+            `;
+          }
+          query.innerHTML = htmlString;
+          let iQuery = null;
+          for (let i = 0; i < this.data.length; i++) {
+            iQuery = document.getElementById(this.data[i].name);
+            iQuery.style.width = `${
+              400 *
+              map(this.data[i].value, this.data[i].min, this.data[i].max, 0, 1)
+            }px`;
+          }
+        };
+
+        this.updateGraph = function () {
+          const query = document.getElementById(this.queryID);
+          let htmlString = "";
+          query.style.display = "flex";
+          query.style.flexDirection = "column";
+          for (let i = 0; i < this.data.length; i++) {
+            htmlString += `
+              <div class="graph-bar-container"">
+                <div class="graph-bar-name">${this.data[i].name}:</div>
+                <div class="graph-bar" id="${this.data[i].name}"></div>
+              </div>
+            `;
+          }
+          query.innerHTML = htmlString;
+          let iQuery = null;
+          for (let i = 0; i < this.data.length; i++) {
+            iQuery = document.getElementById(this.data[i].name);
+            iQuery.style.width = `${
+              400 *
+              map(this.data[i].value, this.data[i].min, this.data[i].max, 0, 1)
+            }px`;
+          }
+        };
+      }
+
+    </script>
+  </body>
+</html>

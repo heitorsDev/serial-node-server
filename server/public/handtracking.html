@@ -27,13 +27,147 @@
     <div id="mediay"></div>
     <br />
     mediaz:
-    <div id="mediaz"></div><br>
-    angle: <div id="angle"></div><br>
-    distance 4-8: <div id="distance48"></div>
+    <div id="mediaz"></div>
+    <br />
+    angle:
+    <div id="angle"></div>
+    <br />
+    distance 4-8:
+    <div id="distance48"></div>
+    <div id="graph"></div>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
     <script>
+      function clamp(x, min, max) {
+        if (x < min) {
+          return min;
+        } else if (x > max) {
+          return max;
+        } else {
+          return x;
+        }
+      }
+      function map(x, in_min, in_max, out_min, out_max) {
+        return (
+          ((x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+        );
+      }
+
+      class Graph {
+        constructor(data) {
+          this.data = data;
+          this.queryID = null;
+        }
+
+        updateSingle(value, index) {
+          this.data[index].value = value;
+        }
+
+        updateArray(array) {
+          for (let i = 0; i < array.length; i++) {
+            this.data[i].value = array[i];
+          }
+        }
+
+        updateAll(json) {
+          this.data = json;
+        }
+
+        log() {
+          console.log(this.data);
+        }
+
+        initGraph(queryID) {
+          const style = document.createElement("style");
+          style.textContent = `
+        .graph-bar-container {
+          display: flex;
+          width: 500px;
+          height: 50px;
+        }
+        .graph-bar-name {
+          width: 100px;
+          background-color: yellow;
+        }
+        .graph-bar {
+          background-color: red;
+          width: 400px;
+        }
+      `;
+          document.head.appendChild(style);
+          this.queryID = queryID;
+          const query = document.getElementById(queryID);
+          let htmlString = "";
+          query.style.display = "flex";
+          query.style.flexDirection = "column";
+          for (let i = 0; i < this.data.length; i++) {
+            htmlString += `
+          <div class="graph-bar-container">
+            <div class="graph-bar-name">${this.data[i].name}:</div>
+            <div class="graph-bar" id="${this.data[i].name}"></div>
+          </div>
+        `;
+          }
+          query.innerHTML = htmlString;
+          let iQuery = null;
+          for (let i = 0; i < this.data.length; i++) {
+            iQuery = document.getElementById(this.data[i].name);
+            iQuery.style.width = `${
+              400 *
+              map(this.data[i].value, this.data[i].min, this.data[i].max, 0, 1)
+            }px`;
+          }
+        }
+
+        updateGraph() {
+          const query = document.getElementById(this.queryID);
+          let htmlString = "";
+          query.style.display = "flex";
+          query.style.flexDirection = "column";
+          for (let i = 0; i < this.data.length; i++) {
+            htmlString += `
+          <div class="graph-bar-container">
+            <div class="graph-bar-name">${this.data[i].name}:</div>
+            <div class="graph-bar" id="${this.data[i].name}"></div>
+          </div>
+        `;
+          }
+          query.innerHTML = htmlString;
+          let iQuery = null;
+          for (let i = 0; i < this.data.length; i++) {
+            iQuery = document.getElementById(this.data[i].name);
+            iQuery.style.width = `${
+              400 *
+              map(this.data[i].value, this.data[i].min, this.data[i].max, 0, 1)
+            }px`;
+          }
+        }
+      }
+
+      let dataGraph = [
+        {
+          name: "angleHand",
+          min: -80,
+          max: 80,
+          value: 0,
+        },
+        {
+          name: "dist48",
+          min: 0,
+          max: 0.5,
+          value: 0,
+        },
+        {
+          name: "angle48",
+          min: -180,
+          max: 180,
+          value: 0,
+        },
+      ];
+      const graph = new Graph(dataGraph);
+      graph.initGraph("graph");
+
       const videoElement = document.getElementById("video");
       const canvasElement = document.getElementById("output");
       const canvasCtx = canvasElement.getContext("2d");
@@ -41,8 +175,8 @@
       const mediaxDOM = document.getElementById("mediax");
       const mediayDOM = document.getElementById("mediay");
       const mediazDOM = document.getElementById("mediaz");
-      const angle08DOM = document.getElementById("angle")
-      const distance48DOM = document.getElementById("distance48")
+      const angle08DOM = document.getElementById("angle");
+      const distance48DOM = document.getElementById("distance48");
       const hands = new Hands({
         locateFile: (file) => {
           return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -92,8 +226,14 @@
             const point4 = landmarks[4];
             const point8 = landmarks[8];
             canvasCtx.beginPath();
-            canvasCtx.moveTo(point4.x * canvasElement.width, point4.y * canvasElement.height);
-            canvasCtx.lineTo(point8.x * canvasElement.width, point8.y * canvasElement.height);
+            canvasCtx.moveTo(
+              point4.x * canvasElement.width,
+              point4.y * canvasElement.height
+            );
+            canvasCtx.lineTo(
+              point8.x * canvasElement.width,
+              point8.y * canvasElement.height
+            );
             canvasCtx.strokeStyle = "#FF0000";
             canvasCtx.lineWidth = 2;
             canvasCtx.stroke();
@@ -118,7 +258,7 @@
           mediay1 /= landmarks[0].length;
           mediaz1 /= landmarks[0].length;
 
-          x8.innerHTML = landmarks[0][8].x.toFixed(2); 
+          x8.innerHTML = landmarks[0][8].x.toFixed(2);
           mediaxDOM.innerHTML = mediax1.toFixed(2);
           mediayDOM.innerHTML = mediay1.toFixed(2);
           mediazDOM.innerHTML = mediaz1.toFixed(2);
@@ -135,26 +275,56 @@
             mediax2 /= landmarks[1].length;
             mediay2 /= landmarks[1].length;
             mediaz2 /= landmarks[1].length;
-            let diffx = mediax2-mediax1
-            let diffy = mediay2-mediay1
-            let diffz = mediaz2-mediaz1
-            x8.innerHTML = landmarks[0][8].x.toFixed(2); 
-            mediaxDOM.innerHTML = diffx.toFixed(2); 
-            mediayDOM.innerHTML = diffy.toFixed(2); 
+            let diffx = mediax2 - mediax1;
+            let diffy = mediay2 - mediay1;
+            let diffz = mediaz2 - mediaz1;
+            x8.innerHTML = landmarks[0][8].x.toFixed(2);
+            mediaxDOM.innerHTML = diffx.toFixed(2);
+            mediayDOM.innerHTML = diffy.toFixed(2);
             mediazDOM.innerHTML = diffz.toFixed(2);
           }
-          let angle = Math.atan2(landmarks[0][0].y - landmarks[0][8].y, landmarks[0][0].z - landmarks[0][8].z);
-          angle*=(180/Math.PI)
-          angle08DOM.innerHTML = angle
-          let distance48 = Math.sqrt(Math.pow(landmarks[0][4].x-landmarks[0][8].x, 2)+Math.pow(landmarks[0][4].y-landmarks[0][8].y, 2))
-          let angle48 = Math.atan2(landmarks[0][4].x - landmarks[0][8].x, landmarks[0][4].y - landmarks[0][8].y);
-          angle48*=(180/Math.PI)
-          
+          let angle = Math.atan2(
+            landmarks[0][0].y - landmarks[0][8].y,
+            landmarks[0][0].z - landmarks[0][8].z
+          );
+          angle *= 180 / Math.PI;
+          angle08DOM.innerHTML = angle;
+          let distance48 = Math.sqrt(
+            Math.pow(landmarks[0][4].x - landmarks[0][8].x, 2) +
+              Math.pow(landmarks[0][4].y - landmarks[0][8].y, 2)
+          );
+          let angle48 = Math.atan2(
+            landmarks[0][4].x - landmarks[0][8].x,
+            landmarks[0][4].y - landmarks[0][8].y
+          );
+          angle48 *= 180 / Math.PI;
+          dataGraph = [
+            {
+              name: "angleHand",
+              min: -80,
+              max: 80,
+              value: clamp(angle, -80, 80)
+            },
+            {
+              name: "dist48",
+              min: 0,
+              max: 0.5,
+              value: clamp(distance48, 0, 0.5),
+            },
+            {
+              name: "angle48",
+              min: -180,
+              max: 180,
+              value: clamp(angle48,-180, 0.5),
+            },
+          ];
+          graph.updateAll(dataGraph);
+          graph.updateGraph();
           let out = {
             angleHand: angle.toFixed(0),
             distance4to8: distance48.toFixed(2),
-            angle4to8: angle48.toFixed(0)
-          }
+            angle4to8: angle48.toFixed(0),
+          };
         }
       }
     </script>

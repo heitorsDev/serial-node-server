@@ -96,10 +96,12 @@ wss.on("connection", (ws) => {
       }
     });
     let json = JSON.parse(message)
-    let float = parseFloat(json.angleHand);
-    let out = clamp(map(float, -80, 80, 0, 180), 0, 180)
-    port.write(`${out.toFixed(2)},1,2\r`);
-    console.log(`${out}\n`);
+    let floatAngleHand = parseFloat(json.angleHand);
+    
+    let angleHand = clamp(map(floatAngleHand, -80, 80, 0, 180), 0, 180)
+    let floatDistance4to8 = parseFloat(json.distance4to8)
+    let distance4to8 = clamp(map(floatDistance4to8, 0, 0.5, 0, 180), 0, 180)
+    port.write(`${angleHand.toFixed(2)},${distance4to8.toFixed(2)},2\r`);
   }
 );
 
